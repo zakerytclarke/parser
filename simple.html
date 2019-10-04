@@ -1,0 +1,143 @@
+<script>
+
+var grammar={
+  "<bool>":["true","false"],
+  "<op>":["or","and"],
+  "<expr>":["<bool>","<expr> <op> <expr>"]
+}
+
+
+//console.log(possibilities(["<expr>"]));
+
+var test=makeTree(parse("<expr>","true or true or false"));
+
+test.print();
+
+function parse(test,str){
+  if(test==str){
+    return test;
+  }else{
+    if(test.indexOf("<")!=-1){//Susbtitution is Possible
+      //Get keyword for Susbtitution
+      var key=test.substring(test.indexOf("<"),test.indexOf(">")+1);
+
+      var arr=grammar[key];
+      //Try all possible substitutions
+      for(var i=0;i<arr.length;i++){
+        var temp=parse(test.replace(key,arr[i]),str);
+        if(temp){
+          return [arr[i],temp];
+          //return temp;
+        }
+
+      }
+      //No possible solutions
+      return false;
+    }else{//No more possible substitutions
+      return false;
+    }
+
+  }
+}
+
+
+function makeTree(arr){
+    console.log(JSON.stringify(arr));
+  var stack=[];
+  //Get the inorder list of substitutions
+  while(arr[1].constructor===Array){
+    stack.push(arr[0]);
+    arr=arr[1];
+  }
+  stack.push(arr[0]);
+
+  var root=new Tree("root");
+
+  helper(stack,root);
+
+
+  return root;
+
+
+}
+
+
+
+function helper(stack,current){
+  console.log(stack);
+  if(stack.length==0){
+    return [];
+  }
+  var args=getElems(stack[0]);//Parse top of stack
+  for(var i=0;i<args.length;i++){
+    current.addChild(args[i]);
+  }
+  stack.shift();
+  for(var i=0;i<current.children.length;i++){
+    if(current.children[i].value.indexOf("<")!=-1){//Substitution
+      var stack=helper(stack,current.children[i]);
+    }
+  }
+  return stack;
+
+}
+
+
+function Tree(val){
+  this.value=val;
+  this.parent;
+  this.children=[];
+
+  this.addChild=function(val){
+    this.children.push(new Tree(val));
+    //this.children[this.children.length-1].parent=this;
+  }
+  this.print=function(h){
+  var height=0;
+  if(h){
+    height=h;
+  }
+
+
+    var out="";
+    for(var i=0;i<height;i++){
+      out+=" ";
+    }
+    console.log(out+"|_"+this.value)
+    for(var i=0;i<this.children.length;i++){
+      this.children[i].print(height+1);
+    }
+
+
+  }
+
+}
+
+
+
+function getElems(str){
+  var out=[];
+  var prev=0;
+  for(var i=0;i<str.length;i++){
+    if(str[i]=="<"){
+      out.push(str.substring(prev,i));
+      prev=i+1;
+    }
+    if(str[i]==">"){
+      out.push(str.substring(prev-1,i+1));
+      prev=i+1;
+    }
+  }
+
+  out.push(str.substring(prev));
+
+  out=out.filter(function(x){
+    if(x==""){
+      return false;
+    }else{
+      return true;
+    }
+  })
+  return out;
+}
+</script>

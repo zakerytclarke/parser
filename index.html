@@ -1,0 +1,154 @@
+<script>
+var calcGrammar={
+  digit:"0|1|2|3|4|5|6|7|8|9",
+  number:"<digit><number>|<digit>.<number>|<digit>",
+  op:"+|-|*|/",
+  expr:"<number>|<expr><op><expr>"
+};
+
+var small={
+  bool:"true|false",
+  op:"or|and",
+  expr:"<bool>|<expr> <op> <expr>"
+}
+
+
+
+calc=new Parser(small);
+
+calc.parse("true or false");
+
+function Parser(grammar){
+  var rules=Object.keys(grammar);
+  //List of Rules to check for substitution
+  rules=rules.map(function(x){
+    return "<"+x+">";
+  });
+
+  for(var key in grammar){
+    grammar[key]=grammar[key].split("|");
+    grammar[key]=grammar[key].map(
+      function(x){
+        var out=[];
+        var tempStr="";
+        for(var i=0;i<x.length;i++){
+          if(x[i]=="<"){
+            out.push(tempStr);
+            tempStr="";
+          }if(x[i]==">"){
+            out.push(tempStr+">");
+            tempStr="";
+          }else{
+            tempStr+=x[i];
+          }
+        }
+        out.push(tempStr);
+        out=out.filter(function(x){
+          if(x==""){
+            return false;
+          }else{
+            return true;
+          }
+        });
+        if(out.length==1){
+          return out[0];
+        }else{
+          return out;
+        }
+      });
+  }
+
+  /**
+   * Convert to AST
+   *
+   */
+  this.parse=function(str){
+    console.log(JSON.stringify(grammar));
+
+
+
+    }
+
+
+
+}
+
+
+/*
+this.parse=function(str){
+  var ast=[];
+  for(var key in grammar){
+    ast.push(check(key,str));
+  }
+  console.log(ast);
+
+  function check(key,str){
+    for(var i=0;i<grammar[key].length;i++){
+      var current=grammar[key][i];
+      console.log(current);
+      if(current.constructor===Array){//Substitute for each arr elem
+        for(var j=0;j<current.length;j++){
+
+        }
+      }else
+      if(current[0]=="<"&&current[current.length-1]==">"){//Substitute in Key
+        var current=current.substr(1,current.length-2);
+        console.log(current);
+        if(!grammar[current]){//Check if rule exists
+          //grammar error();
+        }
+        var out=[];
+        for(var i=0;i<grammar[current].length;i++){//Try all expansions of rule
+          var temp=check(key,str)
+          if(temp)
+        }
+      }else{//String Comparison
+        if(compare(current,str)){//Valid Parse, return valid str and remaining
+          return current;
+        }else{//Invalid Tree
+          return false;
+        }
+      }
+
+    }
+  }
+  function compare(str1,str2){
+    if(str1==str2.substring(0,str1.length)){
+      return str2.substr(str1.length);
+    }else{
+      return false;
+    }
+  }
+}
+
+}
+
+
+*/
+/*
+this.parse=function(str){
+  for(var key in grammar){
+    for(var i=0;i<grammar[key].length;i++){
+      var current=grammar[key][i];
+      if(current[0]=="<"&&current[current.length-1]==">"){
+
+        console.log(current.substring(1,current.length-1));
+      }else{
+        console.log(current);
+      }
+    }
+  }
+
+
+  function compare(str1,str2){
+    if(str1==str2.substring(0,str1.length-1)){
+      return str2.substr(str1.length-1);
+    }else{
+      return false;
+    }
+  }
+}
+
+*/
+
+</script>
